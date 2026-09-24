@@ -1,0 +1,29 @@
+services:
+  app:
+    build: .
+    env_file: .env
+    environment:
+      BOT_URL: http://bot:9000
+      CHAT_STORAGE_DIR: /app/var/chats
+    command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - chat-data:/app/var
+    restart: unless-stopped
+
+  bot:
+    build: .
+    env_file: .env
+    environment:
+      BACKEND_URL: http://app:8000
+      BOT_API_PORT: 9000
+    command: python -m bot
+    ports:
+      - "9000:9000"
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  chat-data:
